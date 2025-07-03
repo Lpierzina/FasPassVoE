@@ -2,6 +2,8 @@ import React, { useState, useRef } from 'react';
 import axios from 'axios';
 import './index.css';
 
+const API_URL = process.env.REACT_APP_BACKEND_URL || "";
+
 function App() {
   const [borrowerName, setBorrowerName] = useState('');
   const [appId, setAppId] = useState('');
@@ -22,12 +24,12 @@ function App() {
     }
     try {
       const user_id = `borrower-${borrowerName.trim().replace(/\s+/g, '-').toLowerCase()}-${Date.now()}`;
-      const userRes = await axios.post('/api/truv-create-user', {
+      const userRes = await axios.post(`${API_URL}/api/truv-create-user`, {
         user_id,
         first_name: borrowerName.trim(),
       });
       const userId = userRes.data.id;
-      const bridgeTokenRes = await axios.post('/api/truv-bridge-token', { user_id: userId });
+      const bridgeTokenRes = await axios.post(`${API_URL}/api/truv-bridge-token`, { user_id: userId });
       const bridgeToken = bridgeTokenRes.data.bridge_token;
 
       // Load Truv Bridge widget
@@ -45,10 +47,10 @@ function App() {
           setLoading(true);
           try {
             // Exchange for access_token and link_id
-            const exchange = await axios.post('/api/truv-exchange-public-token', { public_token });
+            const exchange = await axios.post(`${API_URL}/api/truv-exchange-public-token`, { public_token });
             const { link_id } = exchange.data;
             // Fetch employment data
-            const result = await axios.get(`/api/truv-employment/${link_id}`);
+            const result = await axios.get(`${API_URL}/api/truv-employment/${link_id}`);
             if (result.data && (result.data.employments || result.data.id)) {
               setEmploymentData({
                 borrower_name: borrowerName.trim(),
